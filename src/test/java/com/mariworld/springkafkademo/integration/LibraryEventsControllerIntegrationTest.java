@@ -29,16 +29,16 @@ import java.util.Map;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT) //통합테스트를 진행
 @Slf4j
-@EmbeddedKafka(topics = {"demo-shyook-library-events"}, partitions = 10)
+@EmbeddedKafka(topics = {"demo-shyook-library-events"}, partitions = 10) //스프링부트 제공하는 테스트용 embeded kafka
 @TestPropertySource(properties =
         {"spring.kafka.producer.bootstrap-servers=${spring.embedded.kafka.brokers}"
-, "spring.kafka.admin.properties.bootstrap-servers=${spring.embedded.kafka.brokers}"})
+, "spring.kafka.admin.properties.bootstrap-servers=${spring.embedded.kafka.brokers}"}) // 설정 오버라이드
 public class LibraryEventsControllerIntegrationTest {
 
     @Autowired
-    TestRestTemplate restTemplate;
+    TestRestTemplate restTemplate; // 클라이언트 역할
     @Autowired
     EmbeddedKafkaBroker embeddedKafkaBroker;
     private Consumer<Integer, String> consumer;
