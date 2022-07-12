@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
+
 @RestController
 @Slf4j
 public class LibraryEventController {
@@ -21,7 +23,7 @@ public class LibraryEventController {
     private LibraryEventProducer libraryEventProducer;
 
     @PostMapping("/v1/library-event")
-    public ResponseEntity<LibraryEvent> postLibraryEvent(@RequestBody LibraryEvent libraryEvent) throws JsonProcessingException {
+    public ResponseEntity<LibraryEvent> postLibraryEvent(@RequestBody @Valid LibraryEvent libraryEvent) throws JsonProcessingException {
 
         log.warn("--------------  before sending event --------------------");
 //        libraryEventProducer.sendLibraryEvent(libraryEvent);

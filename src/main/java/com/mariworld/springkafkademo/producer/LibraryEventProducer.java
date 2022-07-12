@@ -50,7 +50,7 @@ public class LibraryEventProducer {
             }
         });
     }
-    public void sendLibraryEventV2(LibraryEvent libraryEvent) throws JsonProcessingException {
+    public ListenableFuture<SendResult<Integer, String>> sendLibraryEventV2(LibraryEvent libraryEvent) throws JsonProcessingException {
         Integer key = libraryEvent.getLibraryEventId();
         String value = objectMapper.writeValueAsString(libraryEvent.toString());
         String topic = "demo-shyook-library-events";
@@ -70,6 +70,7 @@ public class LibraryEventProducer {
                 handleSuceess(key,value,result);
             }
         });
+        return listenableFuture;
     }
 
 
