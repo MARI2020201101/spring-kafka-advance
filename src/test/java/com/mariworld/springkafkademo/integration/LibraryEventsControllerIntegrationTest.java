@@ -60,7 +60,7 @@ public class LibraryEventsControllerIntegrationTest {
     @Test
     public void postLibraryEvent() throws InterruptedException {
         LibraryEvent libraryEvent = LibraryEvent.builder()
-                .libraryEventId(null)
+                .libraryEventId(1)
                 .book(Book.builder()
                             .bookAuthor("Dilip")
                             .bookId(1234)
@@ -83,8 +83,38 @@ public class LibraryEventsControllerIntegrationTest {
 
         Thread.sleep(1000);
         log.warn("record value : {} ", record.value());
-        String value = "\"LibraryEvent(libraryEventId=null, book=Book(bookId=1234, bookName=Kafka Using Spring Boot, bookAuthor=Dilip), libraryEventType=NEW)\"";
+        String value ="{\"libraryEventId\":1,\"book\":{\"bookId\":1234,\"bookName\":\"Kafka Using Spring Boot\",\"bookAuthor\":\"Dilip\"},\"libraryEventType\":\"NEW\"}";
         assertThat(record.value() , is(value));
 
+    }
+
+    @Test
+    public void putLibraryEvent() throws InterruptedException {
+        LibraryEvent libraryEvent = LibraryEvent.builder()
+                .libraryEventId(3)
+                .book(Book.builder()
+                        .bookAuthor("Dilip")
+                        .bookId(1234)
+                        .bookName("Kafka Using Spring Boot")
+                        .build())
+                .build();
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<LibraryEvent> entity = new HttpEntity<>(libraryEvent, httpHeaders);
+
+        ResponseEntity<LibraryEvent> response = restTemplate.exchange("/v1/library-event", HttpMethod.PUT, entity, LibraryEvent.class);
+        log.info("headers : {}", response.getHeaders());
+        log.info("body : {}", response.getBody());
+        log.info("status code : {}", response.getStatusCode());
+
+        assertThat(response.getStatusCode() , is(HttpStatus.OK));
+
+        ConsumerRecord<Integer, String> record = KafkaTestUtils.getSingleRecord(consumer, "demo-shyook-library-events");
+
+        Thread.sleep(1000);
+        log.warn("record value : {} ", record.value());
+        String value = "\"LibraryEvent(libraryEventId=3, book=Book(bookId=1234, bookName=Kafka Using Spring Boot, bookAuthor=Dilip), libraryEventType=UPDATE)\"";
+        assertThat(record.value() , is(value));
     }
 }

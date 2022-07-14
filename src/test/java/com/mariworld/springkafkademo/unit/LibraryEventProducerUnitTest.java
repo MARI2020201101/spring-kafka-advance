@@ -86,7 +86,7 @@ public class LibraryEventProducerUnitTest {
         SendResult<Integer, String> sendResult = new SendResult<>(producerRecord, recordMetadata);
         future.set(sendResult);
 
-        // happy 시나리오의 결과를 테스트한다.
+        // happy 시나리오의 return 값을 테스트한다.
         when(kafkaTemplate.send(isA(ProducerRecord.class))).thenReturn(future);
         SendResult<Integer, String> sendResult1 = producer.sendLibraryEventV2(libraryEvent).get();
 

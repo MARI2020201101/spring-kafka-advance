@@ -1,7 +1,8 @@
 spring:
   profiles:
     active: local
-
+#server:
+#  port: 0
 ---
 spring:
   config:
@@ -12,10 +13,35 @@ spring:
       bootstrap-servers: kafka.stg.iparking.co.kr:9092
       key-serializer: org.apache.kafka.common.serialization.IntegerSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      retries: 10
+      acks: all
+
+    consumer:
+      bootstrap-servers: kafka.stg.iparking.co.kr:9092
+      key-deserializer: org.apache.kafka.common.serialization.IntegerDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      group-id: demo-shyook-library-events-group
 
     admin:
       properties:
         bootstrap:
           servers: kafka.stg.iparking.co.kr:9092
+
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    database: h2
+    database-platform: org.hibernate.dialect.H2Dialect
+    generate-ddl: true
+  h2:
+    console:
+      enabled: true
 #    template:
 #      default-topic: demo-shyook-library-events
+
+
+
+

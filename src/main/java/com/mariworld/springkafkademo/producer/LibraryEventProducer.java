@@ -2,6 +2,7 @@ package com.mariworld.springkafkademo.producer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import com.mariworld.springkafkademo.domain.LibraryEvent;
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,6 +29,9 @@ public class LibraryEventProducer {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private Gson gson;
+
     @PostConstruct
     public void setDefaultTopic(){
         kafkaTemplate.setDefaultTopic("demo-shyook-library-events");
@@ -36,6 +40,7 @@ public class LibraryEventProducer {
     public void sendLibraryEvent(LibraryEvent libraryEvent) throws JsonProcessingException {
         Integer key = libraryEvent.getLibraryEventId();
         String value = objectMapper.writeValueAsString(libraryEvent.toString());
+
         ListenableFuture<SendResult<Integer, String>> listenableFuture = kafkaTemplate.sendDefault(key, value);
 
         //비동기 스레드 & 논블로킹
@@ -72,7 +77,29 @@ public class LibraryEventProducer {
         });
         return listenableFuture;
     }
+    public ListenableFuture<SendResult<Integer, String>> sendLibraryEventV3(LibraryEvent libraryEvent) throws JsonProcessingException {
+        Integer key = libraryEvent.getLibraryEventId();
+        String value = gson.toJson(libraryEvent);
 
+        String topic = "demo-shyook-library-events";
+
+
+        ProducerRecord<Integer, String> producerRecord = buildProducerRecord(key, value, topic);
+        ListenableFuture<SendResult<Integer, String>> listenableFuture = kafkaTemplate.send(producerRecord);
+
+        //비동기 스레드 & 논블로킹
+        listenableFuture.addCallback(new ListenableFutureCallback<SendResult<Integer, String>>() {
+            @Override
+            public void onFailure(Throwable ex) {
+                handleFailure(ex);
+            }
+            @Override
+            public void onSuccess(SendResult<Integer, String> result) {
+                handleSuceess(key,value,result);
+            }
+        });
+        return listenableFuture;
+    }
 
 
     public SendResult<Integer, String> sendLibrarySynchronous(LibraryEvent libraryEvent) throws JsonProcessingException {
@@ -89,14 +116,13 @@ public class LibraryEventProducer {
     }
 
     private ProducerRecord<Integer,String> buildProducerRecord(Integer key, String value, String topic) {
-
         List<Header> recordHeaders = List.of(
                 new RecordHeader("event-source", "scanner".getBytes(StandardCharsets.UTF_8)),
                 new RecordHeader("custom-header", "hello-world".getBytes(StandardCharsets.UTF_8))
         );
-
         return new ProducerRecord<>(topic,null, key, value,recordHeaders);
     }
+
     private void handleFailure(Throwable ex) {
         log.error("Error Message Send ----> {}", ex.getMessage());
     }

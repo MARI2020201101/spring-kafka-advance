@@ -1,6 +1,8 @@
 package com.mariworld.springkafkademo.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+
+
 import com.mariworld.springkafkademo.domain.LibraryEvent;
 import com.mariworld.springkafkademo.domain.LibraryEventType;
 import com.mariworld.springkafkademo.producer.LibraryEventProducer;
@@ -31,13 +33,19 @@ public class LibraryEventController {
 //        log.warn("sendResult ==> {}", sendResult);
 
         libraryEvent.setLibraryEventType(LibraryEventType.NEW);
-        libraryEventProducer.sendLibraryEventV2(libraryEvent);
+//        libraryEventProducer.sendLibraryEventV2(libraryEvent);
+        libraryEventProducer.sendLibraryEventV3(libraryEvent);
         log.warn("--------------  after sending event --------------------");
         return ResponseEntity.status(HttpStatus.CREATED).body(libraryEvent);
     }
 
     @PutMapping("/v1/library-event")
-    public ResponseEntity<LibraryEvent> putLibraryEvent(@RequestBody LibraryEvent libraryEvent) {
-        return null;
+    public ResponseEntity<?> putLibraryEvent(@RequestBody LibraryEvent libraryEvent) throws JsonProcessingException {
+        if(libraryEvent.getLibraryEventId() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please pass the LibraryEventId");
+        }
+        libraryEvent.setLibraryEventType(LibraryEventType.UPDATE);
+        libraryEventProducer.sendLibraryEventV3(libraryEvent);
+        return ResponseEntity.status(HttpStatus.OK).body(libraryEvent);
     }
 }
